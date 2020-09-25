@@ -12,17 +12,18 @@ using System.Collections.Concurrent;
 
 namespace ASFItemDropManager {
 	[Export(typeof(IPlugin))]
-	public sealed class ASFItemDropManager : IBotSteamClient, IBotCommand, IBotCardsFarmerInfo {
+	// public sealed class ASFItemDropManager : IBotSteamClient, IBotCommand, IBotCardsFarmerInfo {
+	public sealed class ASFItemDropManager : IBotSteamClient, IBotCommand {
 		private static ConcurrentDictionary<Bot, ItemDropHandler> ItemDropHandlers = new ConcurrentDictionary<Bot, ItemDropHandler>();
 		public string Name => "ASF Item Dropper";
 		public Version Version => typeof(ASFItemDropManager).Assembly.GetName().Version ?? new Version("0");
 
 		public void OnLoaded() => ASF.ArchiLogger.LogGenericInfo("ASF Item Drop Plugin by webben");
 
-		public static async Task<string?> OnBotFarmingStartet([NotNull] Bot bot)
-        {
-			return bot.Commands.FormatBotResponse(await Task.Run<string>(()=>"okay")).ConfigureAwait(false);
-        }
+		// public static async Task<string?> OnBotFarmingStartet([NotNull] Bot bot)
+        // {
+		// 	return bot.Commands.FormatBotResponse(await Task.Run<string>(()=>"okay")).ConfigureAwait(false);
+        // }
 
 		public async Task<string?> OnBotCommand([NotNull] Bot bot, ulong steamID, [NotNull] string message, string[] args) {
 
