@@ -22,12 +22,9 @@ After installation, you can use those commands (only for accounts with Master+ p
 
 ### `istop`
 
-### `icheck <bots> <appids>`
+### `idrop <bots>? <appid> <itemids>`
 
-Displays current status of achievements in specified games on given bots. You can specify multiple bots and multiple appids.<br/>
-Example of output:<br/>
-![alist output example](https://i.imgur.com/IiRnH81.png)<br/>
-Unlocked achievements are marked as ✅, still locked as ❌. If achievement has mark ⚠️ next to it - it means this achievement is server-side, and can't be switched with this plugin.<br/>
-Examples:<br/>
-`alist bot1 370910,730`<br/>
-`alist bot1,bot2 370910`
+Triggers an item drop on one or more bots
+
+- `idrop bot1,bot2,bot3 1234 122314` trigger on the passed bot names the item trigger
+- `ìdrop 1234 122314` triggers on the bot which enter the command

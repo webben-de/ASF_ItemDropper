@@ -20,10 +20,6 @@ namespace ASFItemDropManager {
 
 		public void OnLoaded() => ASF.ArchiLogger.LogGenericInfo("ASF Item Drop Plugin by webben");
 
-		// public static async Task<string?> OnBotFarmingStartet([NotNull] Bot bot)
-        // {
-		// 	return bot.Commands.FormatBotResponse(await Task.Run<string>(()=>"okay")).ConfigureAwait(false);
-        // }
 
 		public async Task<string?> OnBotCommand([NotNull] Bot bot, ulong steamID, [NotNull] string message, string[] args) {
 
@@ -45,8 +41,10 @@ namespace ASFItemDropManager {
 							return await StartItemIdle(steamID, bot, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false);
 						case "ISTOP" when args.Length > 1:
 							return await StopItemIdle(steamID, bot).ConfigureAwait(false);
-						case "ICHECK" when args.Length > 2:
+						case "IDROP" when args.Length > 2:
 							return await CheckItem(steamID, bot, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false);
+						case "IDROP" when args.Length > 2:
+							return await CheckItem(steamID, args[1], args[2], Utilities.GetArgsAsText(args, 3, ",")).ConfigureAwait(false);
 						default:
 							return null;
 					}
@@ -120,7 +118,22 @@ namespace ASFItemDropManager {
 			return bot.Commands.FormatBotResponse(await Task.Run<string>(() => ItemDropHandler.checkTime(appId, itemdefid)).ConfigureAwait(false));
 
 		}
+		private static async Task<string?> CheckItem(ulong steamID, string botNames, string appid, string itemdefId)
+		{
+			HashSet<Bot>? bots = Bot.GetBots(botNames);
 
+			if ((bots == null) || (bots.Count == 0))
+			{
+				return Commands.FormatStaticResponse(string.Format(Strings.BotNotFound, botNames));
+			}
+
+			IList<string?> results = await Utilities.InParallel(bots.Select(bot => CheckItem(steamID, bot, appid, itemdefId))).ConfigureAwait(false);
+
+			List<string?> responses = new List<string?>(results.Where(result => !string.IsNullOrEmpty(result)));
+
+			return responses.Count > 0 ? string.Join(Environment.NewLine, responses) : null;
+
+		}
 
 	}
 
