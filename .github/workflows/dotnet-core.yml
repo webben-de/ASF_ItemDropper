@@ -23,8 +23,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Publish
       run: dotnet publish -c "Release" -f "netcoreapp3.1" -o "out/generic" "/p:LinkDuringPublish=false"
-    - name: Download a Build Artifact
-      uses: actions/download-artifact@v2.0.5
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.1.4
       with:
         # Artifact name
         name: out
