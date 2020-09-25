@@ -1,0 +1,281 @@
+version: '{build}-{branch}'
+pull_requests:
+  do_not_increment_build_number: true
+skip_branch_with_pr: true
+image: Visual Studio 2019
+configuration: Release
+clone_depth: 10
+environment:
+  DOTNET_CHANNEL: 3.1
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_INSTALL_DIR: C:\Program Files\dotnet
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  NET_CORE_VERSION: netcoreapp3.1
+  NET_FRAMEWORK_VERSION: net48
+  NODE_JS_VERSION: lts
+  STEAM_TOKEN_DUMPER_NAME: ArchiSteamFarm.OfficialPlugins.SteamTokenDumper
+  STEAM_TOKEN_DUMPER_TOKEN:
+    secure: uttQUE9ZK7BIa9SIbDkpUTMx7Slnl3zAPkRNzE465YgwxLdLEwv6yYR5QXCSZolb5Qq23Z/LmZNGd3M6B0+hbx3waWOeW2AiWvfCcnUmuT+3wfLJsgLbf1g4agFS7zsDgeRPfnNMzOxD8etelnA5YOOUMNB3RLw3fIdznNd+Fs6R0Ou3/1UavDuHKkbh1+A5
+  VARIANTS: generic generic-netf linux-arm linux-arm64 linux-x64 osx-x64 win-x64 # NOTE: When modifying variants, don't forget to update ASF_VARIANT definitions in SharedInfo.cs!
+matrix:
+  allow_failures:
+    - image: Visual Studio 2019 Preview
+  fast_finish: true
+install:
+- pwsh: >-
+    Set-StrictMode -Version Latest
+
+    $ErrorActionPreference = 'Stop'
+
+    $ProgressPreference = 'SilentlyContinue'
+
+
+    git submodule sync --recursive
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    git submodule update --init --recursive
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    if ($env:DOTNET_CHANNEL) {
+        dotnet --info
+
+        &([scriptblock]::Create((Invoke-WebRequest 'https://dot.net/v1/dotnet-install.ps1'))) -Channel "$env:DOTNET_CHANNEL" -InstallDir "$env:DOTNET_INSTALL_DIR" -NoPath
+    }
+- ps: Install-Product node "$env:NODE_JS_VERSION"
+before_build:
+- pwsh: >-
+    Set-StrictMode -Version Latest
+
+    $ErrorActionPreference = 'Stop'
+
+    $ProgressPreference = 'SilentlyContinue'
+
+
+    dotnet --info
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    java -version
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+build_script:
+- pwsh: >-
+    Set-StrictMode -Version Latest
+
+    $ErrorActionPreference = 'Stop'
+
+    $ProgressPreference = 'SilentlyContinue'
+
+
+    npm ci --no-progress --prefix ASF-ui
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    npm run-script deploy --no-progress --prefix ASF-ui
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    dotnet build ArchiSteamFarm -c "$env:CONFIGURATION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    dotnet build ArchiSteamFarm.CustomPlugins.ExamplePlugin -c "$env:CONFIGURATION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    dotnet build ArchiSteamFarm.CustomPlugins.PeriodicGC -c "$env:CONFIGURATION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    dotnet build "$env:STEAM_TOKEN_DUMPER_NAME" -c "$env:CONFIGURATION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+test_script:
+- pwsh: >-
+    Set-StrictMode -Version Latest
+
+    $ErrorActionPreference = 'Stop'
+
+    $ProgressPreference = 'SilentlyContinue'
+
+
+    dotnet test ArchiSteamFarm.Tests -c "$env:CONFIGURATION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+after_test:
+- pwsh: >-
+    Set-StrictMode -Version Latest
+
+    $ErrorActionPreference = 'Stop'
+
+    $ProgressPreference = 'SilentlyContinue'
+
+
+    if ((Test-Path env:STEAM_TOKEN_DUMPER_TOKEN) -and (Test-Path "$env:STEAM_TOKEN_DUMPER_NAME\SharedInfo.cs" -PathType Leaf)) {
+        (Get-Content "$env:STEAM_TOKEN_DUMPER_NAME\SharedInfo.cs").Replace('STEAM_TOKEN_DUMPER_TOKEN', "$env:STEAM_TOKEN_DUMPER_TOKEN") | Set-Content "$env:STEAM_TOKEN_DUMPER_NAME\SharedInfo.cs"
+    }
+
+
+    dotnet publish "$env:STEAM_TOKEN_DUMPER_NAME" -c "$env:CONFIGURATION" -f "$env:NET_CORE_VERSION" -o "out/$env:STEAM_TOKEN_DUMPER_NAME/$env:NET_CORE_VERSION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    dotnet publish "$env:STEAM_TOKEN_DUMPER_NAME" -c "$env:CONFIGURATION" -f "$env:NET_FRAMEWORK_VERSION" -o "out/$env:STEAM_TOKEN_DUMPER_NAME/$env:NET_FRAMEWORK_VERSION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+    dotnet clean ArchiSteamFarm -c "$env:CONFIGURATION" -p:UseAppHost=false --nologo
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    dotnet restore ArchiSteamFarm
+
+
+    if ($LastExitCode -ne 0) {
+        throw "Last command failed."
+    }
+
+
+    $PublishBlock = {
+        param($variant)
+
+        Set-StrictMode -Version Latest
+        $ErrorActionPreference = 'Stop'
+        $ProgressPreference = 'SilentlyContinue'
+
+        Set-Location "$env:APPVEYOR_BUILD_FOLDER"
+
+        if ($variant -like '*-netf') {
+            $targetFramework = $env:NET_FRAMEWORK_VERSION
+        } else {
+            $targetFramework = $env:NET_CORE_VERSION
+        }
+
+        if ($variant -like 'generic*') {
+            $variantArgs = '-p:UseAppHost=false'
+        } else {
+            $variantArgs = '-p:PublishSingleFile=true', '-p:PublishTrimmed=true', '-r', "$variant"
+        }
+
+        dotnet publish ArchiSteamFarm -c "$env:CONFIGURATION" -f "$targetFramework" -o "out\$variant" "-p:ASFVariant=$variant" --no-restore --nologo $variantArgs
+
+        if ($LastExitCode -ne 0) {
+            throw "Last command failed."
+        }
+
+        # If we're including any overlay for this variant, copy it to output directory
+        if (Test-Path "ArchiSteamFarm\overlay\$variant" -PathType Container) {
+            Copy-Item "ArchiSteamFarm\overlay\$variant\*" "out\$variant"
+        }
+
+        # If we're including SteamTokenDumper plugin for this framework, copy it to output directory
+        if (Test-Path "out\$env:STEAM_TOKEN_DUMPER_NAME\$targetFramework\$env:STEAM_TOKEN_DUMPER_NAME.dll" -PathType Leaf) {
+            if (!(Test-Path "out\$variant\plugins\$env:STEAM_TOKEN_DUMPER_NAME" -PathType Container)) {
+                New-Item -ItemType Directory -Path "out\$variant\plugins\$env:STEAM_TOKEN_DUMPER_NAME" > $null
+            }
+
+            Copy-Item "out\$env:STEAM_TOKEN_DUMPER_NAME\$targetFramework\$env:STEAM_TOKEN_DUMPER_NAME.dll" "out\$variant\plugins\$env:STEAM_TOKEN_DUMPER_NAME"
+        }
+
+        # Icon is available only in .NET Framework and .NET Core Windows build, we'll bundle the .ico file for other flavours
+        if (($targetFramework -eq "$env:NET_CORE_VERSION") -and !(Test-Path "out\$variant\ArchiSteamFarm.exe" -PathType Leaf)) {
+            Copy-Item 'resources\ASF.ico' "out\$variant\ArchiSteamFarm.ico"
+        }
+
+        # By default use fastest compression
+        $compressionArgs = '-mx=1'
+
+        # Include extra logic for builds marked for release
+        if ($env:APPVEYOR_REPO_TAG -eq 'true') {
+            # Update link in Changelog.html accordingly
+            if (Test-Path "out\$variant\Changelog.html" -PathType Leaf) {
+                (Get-Content "out\$variant\Changelog.html").Replace('ArchiSteamFarm/commits/master', "ArchiSteamFarm/releases/tag/$env:APPVEYOR_REPO_TAG_NAME") | Set-Content "out\$variant\Changelog.html"
+            }
+        }
+
+        7z a -bd -slp -tzip -mm=Deflate $compressionArgs "out\ASF-$variant.zip" "$env:APPVEYOR_BUILD_FOLDER\out\$variant\*"
+
+        if ($LastExitCode -ne 0) {
+            throw "Last command failed."
+        }
+
+        # TODO: Change me to Push-AppveyorArtifact once https://github.com/appveyor/ci/issues/2183 is fixed
+        appveyor PushArtifact "out\ASF-$variant.zip" -FileName "ASF-$variant.zip" -DeploymentName "ASF-$variant.zip"
+    }
+
+
+    foreach ($variant in $env:VARIANTS.Split([char[]] $null, [System.StringSplitOptions]::RemoveEmptyEntries)) {
+        Start-Job -Name "$variant" $PublishBlock -ArgumentList "$variant"
+    }
+
+
+    Get-Job | Receive-Job -Wait -AutoRemoveJob
+deploy: off
+notifications:
+- provider: Webhook
+  url:
+    secure: i/og7KzkpbcWcKoUubrLH+KB6bkfqA55FHUlGxLepLmgZNQeNMiMoAFICOFY795fFrFfUNUKqwk7ApXE6HUyWMoiijLj7G/JBLTPkBiTCu8fZMTMqwQm6FiHB3+/0h0C+ukcrBEqnXYSQUh6znpKqJSTrIfXUQ7ftNuC966kBAw=
+  method: POST
+  body: >-
+    {
+    	"avatar_url": "https://www.appveyor.com/assets/img/appveyor-logo-256.png",
+    	"username": "AppVeyor",
+    	"content": "[{{projectName}}:{{branch}}] {{commitMessage}} by {{commitAuthor}} ({{commitId}}) | **{{status}}** on {{buildUrl}}"
+    }
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
