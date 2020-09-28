@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Composition;
 using System.Threading.Tasks;
@@ -43,13 +43,13 @@ namespace ASFItemDropManager {
 							return await StopItemIdle(steamID, bot).ConfigureAwait(false);
 						case "IDROP" when args.Length > 2:
 							return await CheckItem(steamID, bot, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false);
-						case "IDROP" when args.Length > 2:
-							return await CheckItem(steamID, args[1], args[2], Utilities.GetArgsAsText(args, 3, ",")).ConfigureAwait(false);
-						default:
-							return null;
-					}
-			}
-		}
+                        case "IDROP" when args.Length > 3:
+                            return await CheckItem(steamID, args[1], args[2], Utilities.GetArgsAsText(args, 3, ",")).ConfigureAwait(false);
+                        default:
+                            return null;
+                    }
+            }
+        }
 
 		public void OnBotSteamCallbacksInit([NotNull] Bot bot, [NotNull] CallbackManager callbackManager) { }
 
