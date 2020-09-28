@@ -88,10 +88,8 @@ namespace ASFItemDropManager
                     Console.WriteLine(e);
                 }
 
-
-                Console.WriteLine($"Item droped {Client.SteamID} game:{appid}\n{result.item_json}\n");
             }
-            return "Item droped {Client.SteamID} game:{appid}\n{result.item_json}";
+            return $"No Item dropped for {Client.SteamID}";
         }
         internal string itemIdleingStop(Bot bot)
         {
