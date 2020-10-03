@@ -79,7 +79,7 @@ namespace ASFItemDropManager
 
                     foreach (var item in QuickType.ItemList.FromJson(result.item_json))
                     {
-                        summstring += $"Item droped {Client.SteamID} while {item.Origin} game:{appid} => {item.Quantity}x {item.Itemdefid} @ {item.StateChangedTimestamp}\n";
+                        summstring += $"Item dropped => ItemID: {appid}_{item.Itemid}, ItemDefinition: {item.Itemdefid} @ {item.StateChangedTimestamp}\n";
                     }
                     return summstring;
                 }
