@@ -79,7 +79,7 @@ namespace ASFItemDropManager
 
                     foreach (var item in QuickType.ItemList.FromJson(result.item_json))
                     {
-                        summstring += $"Item dropped => ItemID: {appid}_{item.Itemid}, ItemDefinition: {item.Itemdefid} @ {item.StateChangedTimestamp}\n";
+                        summstring += $"Item dropped => ItemID: {appid}_{item.Itemid}, ItemDefinition: {item.Itemdefid} @ {item.StateChangedTimestamp}";
                     }
                     return summstring;
                 }
@@ -89,7 +89,7 @@ namespace ASFItemDropManager
                 }
 
             }
-            return $"No Item dropped for {Client.SteamID}";
+            return $"No Item dropped.";
         }
         internal string itemIdleingStop(Bot bot)
         {
