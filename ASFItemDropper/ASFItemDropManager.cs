@@ -47,10 +47,10 @@ namespace ASFItemDropManager
                             return await StartItemIdle(steamID, bot, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false);
                         case "ISTOP" when args.Length > 1:
                             return await StopItemIdle(steamID, bot).ConfigureAwait(false);
-                        case "IDROP" when args.Length > 2:
-                            return await CheckItem(steamID, bot, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false);
                         case "IDROP" when args.Length > 3:
                             return await CheckItem(steamID, args[1], args[2], Utilities.GetArgsAsText(args, 3, ",")).ConfigureAwait(false);
+                        case "IDROP" when args.Length > 2:
+                            return await CheckItem(steamID, bot, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false);
                         default:
                             return null;
                     }

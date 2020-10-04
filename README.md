@@ -6,7 +6,7 @@ This plugin is provided on AS-IS basis, without any guarantee at all. Author is 
 
 ## Introduction
 
-This plugin for [ASF](https://github.com/JustArchiNET/ArchiSteamFarm/) allows you to view, set and reset achievements in steam games, similar to [SAM](https://github.com/gibbed/SteamAchievementManager). Works only with ASF v4.0+ (make sure to check actual required version in release notes).
+This plugin for [ASF](https://github.com/JustArchiNET/ArchiSteamFarm/) allows you to trigger ingame item drops for idled games. Works only with ASF v4.0+ (make sure to check actual required version in release notes).
 
 ## Installation
 
@@ -22,9 +22,12 @@ After installation, you can use those commands (only for accounts with Master+ p
 
 ### `istop`
 
-### `idrop <bots>? <appid> <itemids>`
+### `idrop <bots> <appid> <drop definition list>`
 
-Triggers an item drop on one or more bots
+Triggers an item drop on single or on multiple bots.
 
-- `idrop bot1,bot2,bot3 1234 122314` trigger on the passed bot names the item trigger
-- `ìdrop 1234 122314` triggers on the bot which enter the command
+- `idrop bot1,bot2,bot3 987654 12345` triggers drops on the given bot names
+- `idrop bot1..bot3 987654 12345` triggers drops on the given bot names
+
+- `idrop bot1 987654 12345` triggers drop on the bot, where the command was sent to
+- `idrop 987654 12345` triggers drop on the bot, where the command was sent to
