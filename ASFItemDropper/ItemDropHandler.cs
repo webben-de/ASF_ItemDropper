@@ -79,9 +79,10 @@ namespace ASFItemDropManager
             var ownedReponse = await _PlayerService.SendMessage(x => x.GetOwnedGames(gamesOwnedRequest));
             var resultGamesPlayed = consumePlaytimeResponse.GetDeserializedResponse<CPlayer_GetOwnedGames_Response>();
             var resultFilteredGameById = resultGamesPlayed.games.Find(game => game.appid == appid);
+            var appidPlaytimeForever = 0;
             if (resultGamesPlayed != null && resultFilteredGameById != null)
             {
-                var appidPlaytimeForever = resultFilteredGameById.playtime_forever;
+                appidPlaytimeForever = resultFilteredGameById.playtime_forever;
             }
 
 
