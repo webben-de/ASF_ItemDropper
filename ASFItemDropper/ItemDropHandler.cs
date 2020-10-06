@@ -17,6 +17,7 @@ namespace ASFItemDropManager
     public sealed class ItemDropHandler : ClientMsgHandler
     {
         private SteamUnifiedMessages.UnifiedService<IInventory> _inventoryService;
+        private SteamUnifiedMessages.UnifiedService<IPlayer> _PlayerService;
 
         ConcurrentDictionary<ulong, StoredResponse> Responses = new ConcurrentDictionary<ulong, StoredResponse>();
 
@@ -62,24 +63,33 @@ namespace ASFItemDropManager
             Client.Send(response);
             return "Start idling for " + appid;
         }
-        internal async Task<string> checkTime(uint appid, uint itemdefid)
+        internal async Task<string> checkTime(uint appid, uint itemdefid, Bot bot)
         {
-            CInventory_ConsumePlaytime_Request reponse = new CInventory_ConsumePlaytime_Request { appid = appid, itemdefid = itemdefid };
-            var steamUnifiedMessages = Client.GetHandler<SteamUnifiedMessages>();
-            _inventoryService = steamUnifiedMessages.CreateService<IInventory>();
+            CInventory_ConsumePlaytime_Request playtimeResponse = new CInventory_ConsumePlaytime_Request { appid = appid, itemdefid = itemdefid };
+            CPlayer_GetOwnedGames_Request gamesOwnedRequest = new CPlayer_GetOwnedGames_Request { steamid = bot.SteamID };
 
-            var responce = await _inventoryService.SendMessage(x => x.ConsumePlaytime(reponse));
-            var result = responce.GetDeserializedResponse<CInventory_Response>();
-            if (result.item_json != "[]")
+            var steamUnifiedMessages = Client.GetHandler<SteamUnifiedMessages>();
+
+            _inventoryService = steamUnifiedMessages.CreateService<IInventory>();
+            _PlayerService = steamUnifiedMessages.CreateService<IPlayer>();
+
+            var consumePlaytimeResponse = await _inventoryService.SendMessage(x => x.ConsumePlaytime(playtimeResponse));
+            var consumePlaytime = consumePlaytimeResponse.GetDeserializedResponse<CInventory_Response>();
+
+            var ownedReponse = await _PlayerService.SendMessage(x => x.GetOwnedGames(gamesOwnedRequest));
+            var resultGamesPlayed = consumePlaytimeResponse.GetDeserializedResponse<CPlayer_GetOwnedGames_Response>();
+            var appidPlaytimeForever = resultGamesPlayed.games.Find(game => game.appid == appid).playtime_forever;
+
+            if (consumePlaytime.item_json != "[]")
             {
                 try
                 {
-                    Console.WriteLine(result.item_json);
+                    Console.WriteLine(consumePlaytime.item_json);
                     var summstring = "";
 
-                    foreach (var item in QuickType.ItemList.FromJson(result.item_json))
+                    foreach (var item in QuickType.ItemList.FromJson(consumePlaytime.item_json))
                     {
-                        summstring += $"Item dropped => ItemID: {appid}_{item.Itemid}, ItemDefinition: {item.Itemdefid} @ {item.StateChangedTimestamp}";
+                        summstring += $"Item dropped => ItemID: {appid}_{item.Itemid}, ItemDefinition: {item.Itemdefid} @ {item.StateChangedTimestamp} (playtime: {appidPlaytimeForever}) \n";
                     }
                     return summstring;
                 }
