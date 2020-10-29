@@ -111,8 +111,11 @@ namespace ASFItemDropManager
             {
                 return null;
             }
-
-			return bot.Commands.FormatBotResponse(await Task.Run<string>(() => ItemDropHandler.itemDropDefList(bot)).ConfigureAwait(false));
+            if (!ItemDropHandlers.TryGetValue(bot, out ItemDropHandler? ItemDropHandler))
+            {
+                return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(ItemDropHandlers)));
+            }
+            return bot.Commands.FormatBotResponse(await Task.Run<string>(() => ItemDropHandler.itemDropDefList(bot)).ConfigureAwait(false));
 
         }
         private static async Task<string?> CheckItem(ulong steamID, Bot bot, string appid, string itemdefId)
