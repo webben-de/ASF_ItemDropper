@@ -66,7 +66,7 @@ namespace ASFItemDropManager
         internal async Task<string> checkTime(uint appid, uint itemdefid, Bot bot)
         {
             CInventory_ConsumePlaytime_Request playtimeResponse = new CInventory_ConsumePlaytime_Request { appid = appid, itemdefid = itemdefid };
-            CPlayer_GetOwnedGames_Request gamesOwnedRequest = new CPlayer_GetOwnedGames_Request { steamid = bot.SteamID };
+            CPlayer_GetOwnedGames_Request gamesOwnedRequest = new CPlayer_GetOwnedGames_Request { steamid = bot.SteamID, include_played_free_games = true };
 
             var steamUnifiedMessages = Client.GetHandler<SteamUnifiedMessages>();
 
