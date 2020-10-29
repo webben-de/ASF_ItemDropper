@@ -51,6 +51,8 @@ namespace ASFItemDropManager
                             return await CheckItem(steamID, args[1], args[2], Utilities.GetArgsAsText(args, 3, ",")).ConfigureAwait(false);
                         case "IDROP" when args.Length > 2:
                             return await CheckItem(steamID, bot, args[1], Utilities.GetArgsAsText(args, 2, ",")).ConfigureAwait(false);
+						case "IDROPDEFLIST" when args.Length > 1:
+						    return await ItemDropDefList(steamID, bot).ConfigureAwait(false);
                         default:
                             return null;
                     }
@@ -101,6 +103,16 @@ namespace ASFItemDropManager
                 return bot.Commands.FormatBotResponse(string.Format(Strings.ErrorIsEmpty, nameof(ItemDropHandlers)));
             }
             return bot.Commands.FormatBotResponse(await Task.Run<string>(() => ItemDropHandler.itemIdleingStop(bot)).ConfigureAwait(false));
+
+        }
+		private static async Task<string?> ItemDropDefList(ulong steamID, Bot bot)
+        {
+            if (!bot.HasPermission(steamID, BotConfig.EPermission.Master))
+            {
+                return null;
+            }
+
+			return bot.Commands.FormatBotResponse(await Task.Run<string>(() => ItemDropHandler.itemDropDefList(bot)).ConfigureAwait(false));
 
         }
         private static async Task<string?> CheckItem(ulong steamID, Bot bot, string appid, string itemdefId)
